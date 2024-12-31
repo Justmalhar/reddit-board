@@ -100,6 +100,12 @@ export function SubredditColumn({
     );
   };
 
+  const setVideoRef = (id: string) => (el: HTMLVideoElement | null) => {
+    if (videoRefs.current) {
+      videoRefs.current[id] = el;
+    }
+  };
+
   return (
     <div className="flex flex-col w-[75vw] flex-shrink-0 bg-gray-50 rounded-lg shadow-md h-[calc(100vh-12rem)] overflow-hidden max-w-[400px]">
       <div className="flex items-center justify-between p-3 bg-white border-b">
@@ -183,7 +189,7 @@ export function SubredditColumn({
                 {post.videoUrl ? (
                   <div className="relative">
                     <video
-                      ref={el => videoRefs.current[post.id] = el}
+                      ref={setVideoRef(post.id)}
                       src={post.videoUrl}
                       controls={false}
                       muted={!mutedVideos[post.id]}

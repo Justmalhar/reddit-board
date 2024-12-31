@@ -1,9 +1,10 @@
 export interface RedditPost {
+  id: string
   title: string
   url: string
   author: string
   created: number
-  selftext: string
+  selftext?: string
   ups: number
   num_comments: number
   thumbnail: string
