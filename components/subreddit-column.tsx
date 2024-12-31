@@ -22,6 +22,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import type { SubredditColumn, SortOption, TimeFilter } from '../types/subreddit'
 import { sortPosts } from '../utils/subreddit'
 import { getRelativeTime } from '../utils/dateUtils'
+import Image from 'next/image'
 
 interface SubredditColumnProps {
   column: SubredditColumn
@@ -42,7 +43,7 @@ export function SubredditColumn({
   isLoading,
   error
 }: SubredditColumnProps) {
-  const lastRefreshed = new Date(column.lastRefreshed).toLocaleTimeString()
+  const lastRefreshed = new Date(column.lastRefreshed).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true })
   const [mutedVideos, setMutedVideos] = useState<{ [key: string]: boolean }>({})
   const [playingVideos, setPlayingVideos] = useState<{ [key: string]: boolean }>({})
   const [localSortBy, setLocalSortBy] = useState<'default' | 'ups' | 'num_comments'>('default')
@@ -81,15 +82,13 @@ export function SubredditColumn({
     if (!error) return null;
 
     let icon = <AlertCircle className="h-4 w-4" />;
-    let title = "Error";
-    let description = error;
+    const title = "Error";
+    const description = error;
 
     if (error.includes("network")) {
       icon = <WifiOff className="h-4 w-4" />;
-      title = "Network Error";
     } else if (error.includes("not found") || error.includes("404")) {
       icon = <Ban className="h-4 w-4" />;
-      title = "Subreddit Not Found";
     }
 
     return (
@@ -216,17 +215,23 @@ export function SubredditColumn({
                     </div>
                   </div>
                 ) : post.gifUrl ? (
-                  <img
-                    src={post.gifUrl}
-                    alt={post.title}
-                    className="w-full rounded-t-md"
-                  />
+                  <div className="relative w-full aspect-video">
+                    <Image
+                      src={post.gifUrl}
+                      alt={post.title}
+                      fill
+                      className="rounded-t-md object-cover"
+                    />
+                  </div>
                 ) : post.preview?.images[0]?.source.url ? (
-                  <img
-                    src={post.preview.images[0].source.url.replace(/&amp;/g, '&')}
-                    alt={post.title}
-                    className="w-full h-48 object-cover rounded-t-md"
-                  />
+                  <div className="relative w-full h-48">
+                    <Image
+                      src={post.preview.images[0].source.url.replace(/&amp;/g, '&')}
+                      alt={post.title}
+                      fill
+                      className="object-cover rounded-t-md"
+                    />
+                  </div>
                 ) : null}
                 <div className="p-4">
                   <a

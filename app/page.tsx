@@ -7,6 +7,7 @@ import { fetchSubredditFeed, saveSubredditData, getSubredditData } from '@/utils
 import type { SubredditColumn as SubredditColumnType, SortOption, TimeFilter } from '@/types/subreddit'
 import { AlertCircle } from 'lucide-react'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import Image from 'next/image'
 
 const STORAGE_KEY = 'reddit-board-subreddits'
 
@@ -15,14 +16,12 @@ export default function RedditBoard() {
   const [loadingColumns, setLoadingColumns] = useState<{ [key: string]: boolean }>({})
   const [errorColumns, setErrorColumns] = useState<{ [key: string]: string | null }>({})
   const [error, setError] = useState<string | null>(null)
-  const [logs, setLogs] = useState<string[]>([])
 
   useEffect(() => {
     const loadSavedSubreddits = async () => {
       const initialLoadingState: { [key: string]: boolean } = {}
       const initialErrorState: { [key: string]: string | null } = {}
       setError(null)
-      setLogs([])
       
       try {
         const saved = localStorage.getItem(STORAGE_KEY)
@@ -47,8 +46,7 @@ export default function RedditBoard() {
                   }
                 }
 
-                const { posts, logs: subLogs } = await fetchSubredditFeed(name)
-                setLogs(prev => [...prev, ...subLogs])
+                const { posts } = await fetchSubredditFeed(name)
                 const newData = {
                   name,
                   url: `https://reddit.com/r/${name}`,
@@ -60,9 +58,6 @@ export default function RedditBoard() {
                 saveSubredditData(name, newData)
                 return newData
               } catch (err) {
-                if (err.logs) {
-                  setLogs(prev => [...prev, ...err.logs])
-                }
                 console.error(`Failed to load r/${name}:`, err)
                 setErrorColumns(prev => ({ ...prev, [name]: err.message || 'Failed to load subreddit' }))
                 return null
@@ -99,11 +94,9 @@ export default function RedditBoard() {
 
     setLoadingColumns(prev => ({ ...prev, [input]: true }))
     setError(null)
-    setLogs([])
 
     try {
-      const { posts, logs: subLogs } = await fetchSubredditFeed(input)
-      setLogs(subLogs)
+      const { posts } = await fetchSubredditFeed(input)
       const newColumn = {
         name: input,
         url: `https://reddit.com/r/${input}`,
@@ -117,9 +110,6 @@ export default function RedditBoard() {
       setErrorColumns(prev => ({ ...prev, [input]: null }))
       return true
     } catch (err) {
-      if (err.logs) {
-        setLogs(err.logs)
-      }
       let errorMessage = `Failed to load r/${input}: `
       if (err.error instanceof Error) {
         errorMessage += err.error.message
@@ -149,11 +139,9 @@ export default function RedditBoard() {
     const columnToRefresh = columns[index]
     setLoadingColumns(prev => ({ ...prev, [columnToRefresh.name]: true }))
     setError(null)
-    setLogs([])
 
     try {
-      const { posts, logs: subLogs } = await fetchSubredditFeed(columnToRefresh.name, sortBy, timeFilter)
-      setLogs(subLogs)
+      const { posts } = await fetchSubredditFeed(columnToRefresh.name, sortBy, timeFilter)
       const updatedColumn = {
         ...columnToRefresh,
         posts,
@@ -165,9 +153,6 @@ export default function RedditBoard() {
       saveSubredditData(columnToRefresh.name, updatedColumn)
       setErrorColumns(prev => ({ ...prev, [columnToRefresh.name]: null }))
     } catch (err) {
-      if (err.logs) {
-        setLogs(err.logs)
-      }
       let errorMessage = `Failed to refresh r/${columnToRefresh.name}: `
       if (err.error instanceof Error) {
         errorMessage += err.error.message
@@ -195,10 +180,11 @@ export default function RedditBoard() {
     <div className="flex flex-col h-screen bg-orange-100/50">
       <header className="sticky top-0 z-20 bg-white shadow-md p-4 flex justify-between items-center">
         <div className="flex items-center gap-3">
-          <img 
+          <Image 
             src="https://img.icons8.com/?size=100&id=5RTQxy0E0NUY&format=png&color=000000" 
             alt="Reddit Logo" 
-            className="w-8 h-8"
+            width={32}
+            height={32}
           />
           <h1 className="text-2xl font-bold text-orange-600">RedditBoard</h1>
         </div>
