@@ -34,24 +34,28 @@ export function AddSubreddit({ onAdd, error }: AddSubredditProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const subreddit = parseSubredditInput(input)
-    
-    if (!subreddit) {
-      setLocalError('Invalid subreddit format')
+    if (!input.trim()) {
+      setLocalError('Please enter a subreddit name')
       return
     }
 
-    setLocalError(null)
     setIsLoading(true)
+    setLocalError(null)
 
     try {
-      const success = await onAdd(subreddit)
+      const cleanInput = input.trim().toLowerCase()
+      if (!/^[a-zA-Z0-9_]+$/.test(cleanInput)) {
+        setLocalError('Invalid subreddit name')
+        return
+      }
+
+      const success = await onAdd(cleanInput)
       if (success) {
         setInput('')
-        setIsOpen(false)
       }
     } catch (err) {
-      setLocalError(err.message || 'Failed to add subreddit')
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add subreddit'
+      setLocalError(errorMessage)
     } finally {
       setIsLoading(false)
     }
