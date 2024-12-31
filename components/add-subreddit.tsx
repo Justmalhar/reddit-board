@@ -13,7 +13,6 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { parseSubredditInput } from '../utils/subreddit'
 
 interface AddSubredditProps {
   onAdd: (subreddit: string) => Promise<boolean>
