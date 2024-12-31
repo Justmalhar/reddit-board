@@ -59,7 +59,8 @@ export default function RedditBoard() {
                 return newData
               } catch (err) {
                 console.error(`Failed to load r/${name}:`, err)
-                setErrorColumns(prev => ({ ...prev, [name]: err.message || 'Failed to load subreddit' }))
+                const errorMessage = err instanceof Error ? err.message : 'Failed to load subreddit'
+                setErrorColumns(prev => ({ ...prev, [name]: errorMessage }))
                 return null
               } finally {
                 setLoadingColumns(prev => ({ ...prev, [name]: false }))
@@ -111,8 +112,8 @@ export default function RedditBoard() {
       return true
     } catch (err) {
       let errorMessage = `Failed to load r/${input}: `
-      if (err.error instanceof Error) {
-        errorMessage += err.error.message
+      if (err instanceof Error) {
+        errorMessage += err.message
       } else {
         errorMessage += 'Unknown error occurred.'
       }
@@ -154,8 +155,8 @@ export default function RedditBoard() {
       setErrorColumns(prev => ({ ...prev, [columnToRefresh.name]: null }))
     } catch (err) {
       let errorMessage = `Failed to refresh r/${columnToRefresh.name}: `
-      if (err.error instanceof Error) {
-        errorMessage += err.error.message
+      if (err instanceof Error) {
+        errorMessage += err.message
       } else {
         errorMessage += 'Unknown error occurred.'
       }
